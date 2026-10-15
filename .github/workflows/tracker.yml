@@ -1,0 +1,34 @@
+name: Tropiciel Promocji Scheduler
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Codziennie o 8:00 UTC
+  workflow_dispatch: # Przycisk do ręcznego uruchamiania
+
+jobs:
+  run-tracker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobierz kod repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja Pythona
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalacja zależności i Playwright
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Uruchomienie skryptu
+        run: python main.py
+
+      - name: Zapisz bazę danych na GitHubie
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "bot@github.com"
+          git add ceny_tracker.db
+          git commit -m "Auto-aktualizacja cen: $(date +'%Y-%m-%d')" || exit 0
+          git push

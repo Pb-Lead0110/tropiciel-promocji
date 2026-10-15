@@ -10,7 +10,7 @@ def main():
     # 1. Zdefiniuj produkty do śledzenia
     produkty_do_sledzenia = [
         {"nazwa": "Słuchawki Sony MX5", "url": "https://www.mediaexpert.pl/telewizory-i-rtv/sluchawki/wszystkie-sluchawki/sluchawki-bluetooth-sony-wh1000xm5b-ce7-anc-nauszne-czarne"},
-        {"nazwa": "Telewizor LG OLED", "url": "https://www.mediaexpert.pl/telewizory-i-rtv/telewizory/telewizor-lg-55c5elb-55-oled-4k-120hz-webos-dolby-vision-dolby-atmos-hdmi-2-1"}
+        {"nazwa": "Telewizor LG OLED 55", "url": "https://www.mediaexpert.pl/telewizory-i-rtv/telewizory/telewizor-lg-55c5elb-55-oled-4k-120hz-webos-dolby-vision-dolby-atmos-hdmi-2-1"}
     ]
     
     # 2. Dodaj je do bazy (jeśli jeszcze ich tam nie ma)

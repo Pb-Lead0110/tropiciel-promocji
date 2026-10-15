@@ -4,23 +4,28 @@ import json
 
 def get_price(url):
     with sync_playwright() as p:
-        # Uruchamiamy przeglądarkę Chromium z wyłączoną flagą automatyzacji
         browser = p.chromium.launch(
             headless=True,
             args=['--disable-blink-features=AutomationControlled']
         )
-
+        
+        # WSTRZYKNIĘCIE POLSKIEJ TOŻSAMOŚCI DLA SERWERÓW GITHUBA
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 1080}
+            viewport={"width": 1920, "height": 1080},
+            locale="pl-PL",                   # Wymuszamy polski język
+            timezone_id="Europe/Warsaw",      # Wymuszamy polską strefę czasową
+            extra_http_headers={
+                "Accept-Language": "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Referer": "https://www.google.pl/" # Udajemy wejście z polskiego Google
+            }
         )
-
+        
         page = context.new_page()
 
         try:
-            # Przechodzimy na stronę i czekamy na wczytanie sieci
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            page.wait_for_timeout(3000) # 3 sekundy na wygenerowanie kodu
+            page.wait_for_timeout(4000) 
 
             html = page.content()
             soup = BeautifulSoup(html, 'html.parser')
@@ -45,6 +50,8 @@ def get_price(url):
                 except:
                     continue
 
+            # TRYB DEBUGOWANIA - Jeśli nadal nie znajduje danych, zrób zrzut ekranu
+            print("Nie znaleziono ceny. Sprawdzam, czy to blokada Cloudflare...")
             return None
 
         except Exception as e:

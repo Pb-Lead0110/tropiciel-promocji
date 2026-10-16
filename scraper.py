@@ -27,11 +27,25 @@ def get_price(url):
 
         try:
             print(f"Pobieranie danych z: {url}")
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            
-            # Wymuszenie załadowania dynamicznej zawartości
-            page.mouse.wheel(0, 1500)
-            page.wait_for_timeout(5000)
+            response = page.goto(
+                url,
+                wait_until="domcontentloaded",
+                timeout=60000
+            )
+
+            print("Status HTTP:", response.status if response else "brak odpowiedzi")
+            print("URL po załadowaniu:", page.url)
+            print("Tytuł strony:", page.title())
+
+            try:
+                page.locator("span.whole").first.wait_for(
+                    state="visible",
+                    timeout=15000
+                )
+            except Exception:
+                print("Nie znaleziono widocznego elementu span.whole")
+                print("Fragment tekstu strony:", page.locator("body").inner_text()[:1500])
+                page.screenshot(path="debug-page.png", full_page=True)
 
             # --- SZUKANIE CENY BEZPOŚREDNIO W HTML (ZŁOTÓWKI + GROSZE) ---
             

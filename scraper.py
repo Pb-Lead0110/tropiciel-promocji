@@ -1,57 +1,84 @@
 from playwright.sync_api import sync_playwright
-from bs4 import BeautifulSoup
-import json
+import re
 
 def get_price(url):
+    """
+    Pobiera stronę podszywając się pod połączenie sieciowe Chrome,
+    omija blokady anty-botowe i wyciąga cenę bezpośrednio z głównego elementu HTML (złotówki + grosze).
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
             args=['--disable-blink-features=AutomationControlled']
         )
         
-        # WSTRZYKNIĘCIE POLSKIEJ TOŻSAMOŚCI DLA SERWERÓW GITHUBA
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080},
-            locale="pl-PL",                   # Wymuszamy polski język
-            timezone_id="Europe/Warsaw",      # Wymuszamy polską strefę czasową
+            locale="pl-PL",
+            timezone_id="Europe/Warsaw",
             extra_http_headers={
                 "Accept-Language": "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Referer": "https://www.google.pl/" # Udajemy wejście z polskiego Google
+                "Referer": "https://www.google.pl/"
             }
         )
         
         page = context.new_page()
 
         try:
+            print(f"Pobieranie danych z: {url}")
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            page.wait_for_timeout(4000) 
+            
+            # Wymuszenie załadowania dynamicznej zawartości
+            page.mouse.wheel(0, 1500)
+            page.wait_for_timeout(5000)
 
-            html = page.content()
-            soup = BeautifulSoup(html, 'html.parser')
+            # --- SZUKANIE CENY BEZPOŚREDNIO W HTML (ZŁOTÓWKI + GROSZE) ---
+            
+            # Szukamy głownego kontenera z ceną (zazwyczaj ma klasę "price" lub "price-box")
+            # a w nim elementów odpowiedzialnych za całe złotówki ("whole") i resztę ("cents")
+            # Ponieważ klasy mogą się minimalnie różnić, szukamy tekstu pasującego do wzorca.
 
-            # Metoda 1: Meta OpenGraph
-            meta_price = soup.find('meta', attrs={'property': 'product:price:amount'})
-            if meta_price and meta_price.get('content'):
-                return float(meta_price['content'])
+            # Playwright pozwala wyciągnąć wszystkie elementy pasujące do selektora.
+            # Szukamy elementu <span> zawierającego klasę "whole" (złotówki) w obrębie kontenera głównej sekcji
+            
+            try:
+                # W Media Expert często cena całkowita jest w <span> z klasą 'whole' 
+                # Jeśli w przyszłości zmienią to na np 'main-price', trzeba to zaktualizować.
+                whole_element = page.locator("span.whole").first
+                cents_element = page.locator("span.cents").first
 
-            # Metoda 2: JSON-LD (Schema.org)
-            scripts = soup.find_all("script", type="application/ld+json")
-            for script in scripts:
-                try:
-                    data = json.loads(script.string)
-                    items = data if isinstance(data, list) else [data]
-                    for item in items:
-                        if item.get("@type") == "Product" and item.get("offers"):
-                            offers = item.get("offers")
-                            price = offers[0].get("price") if isinstance(offers, list) else offers.get("price")
-                            if price is not None:
-                                return float(price)
-                except:
-                    continue
+                if whole_element.count() > 0:
+                    whole_text = whole_element.inner_text()
+                    cents_text = cents_element.inner_text() if cents_element.count() > 0 else "00"
 
-            # TRYB DEBUGOWANIA - Jeśli nadal nie znajduje danych, zrób zrzut ekranu
-            print("Nie znaleziono ceny. Sprawdzam, czy to blokada Cloudflare...")
+                    # Łączymy "1 999" i "00"
+                    raw_price = f"{whole_text}.{cents_text}"
+                    print(f"Znalazłem surową cenę na stronie (HTML): {raw_price}")
+
+                    # Czyszczenie (uniwersalne) z ewentualnych spacji i symboli
+                    clean_price = re.sub(r'[^\d.]', '', raw_price)
+                    
+                    if clean_price:
+                         return float(clean_price)
+            except Exception as extract_error:
+                print(f"Nie udało się wyciągnąć ceny ze znaczników HTML: {extract_error}")
+
+            # Awaryjny odczyt - jeśli powyższe nie znajdzie "span.whole", szukamy jakiegokolwiek kontenera z symbolem zł
+            # i bardzo ostrożnie filtrujemy.
+            try:
+                # Ograniczamy szukanie do sekcji z ceną (np. sekcja boczna obok zdjęć)
+                # Omijamy stopkę i nagłówek, żeby nie złapać "Koszty dostawy: 20zł"
+                # Wymaga to bardziej ogólnego lokatora, ale z większym rygorem czyszczenia.
+                
+                # Zamiast skomplikowanych xpathów, pobierzemy tekst całej strony i wyłowimy największą liczbę
+                # obok symbolu "zł", ale to mogłoby być niebezpieczne.
+                pass # na razie zostawiamy pierwszą metodę
+                
+            except Exception:
+                 pass
+
+            print("Nie znaleziono ceny w kodzie pomimo udanego wczytania strony.")
             return None
 
         except Exception as e:

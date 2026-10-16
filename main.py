@@ -11,7 +11,9 @@ def main():
     produkty_do_sledzenia = [
         {"nazwa": "Słuchawki Sony MX5", "url": "https://www.mediaexpert.pl/telewizory-i-rtv/sluchawki/wszystkie-sluchawki/sluchawki-bluetooth-sony-wh1000xm5b-ce7-anc-nauszne-czarne"},
         {"nazwa": "Telewizor LG OLED 55 cali", "url": "https://www.mediaexpert.pl/telewizory-i-rtv/telewizory/telewizor-lg-55c5elb-55-oled-4k-120hz-webos-dolby-vision-dolby-atmos-hdmi-2-1"},
-        {"nazwa": "Smartfon Samsung Galaxy A57", "url": "https://www.mediaexpert.pl/smartfony-i-zegarki/smartfony/smartfon-samsung-galaxy-a57-5g-8-128gb-6-7-120hz-granatowy-sm-a576"}
+        {"nazwa": "Smartfon Samsung Galaxy A57", "url": "https://www.mediaexpert.pl/smartfony-i-zegarki/smartfony/smartfon-samsung-galaxy-a57-5g-8-128gb-6-7-120hz-granatowy-sm-a576"},
+        {"nazwa": "Ekspress Delonghi Eletta Explore", "url": "https://www.mediaexpert.pl/agd-male/ekspresy-i-kawa/ekspresy-cisnieniowe/ekspres-delonghi-eletta-explore-ecam450-55-g"},
+        {"nazwa": "Smartwatch HUAWEI Watch GT 7 Pro Active", "url": "https://www.mediaexpert.pl/smartfony-i-zegarki/smartwatche-i-zegarki/smartwatche/smartwatch-huawei-watch-gt-7-pro-active-46mm-czarny"},        
     ]
     
     # 2. Dodaj je do bazy (jeśli jeszcze ich tam nie ma)

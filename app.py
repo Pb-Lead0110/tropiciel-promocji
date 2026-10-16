@@ -19,7 +19,7 @@ def load_data():
         conn.close()
         return df
     except sqlite3.OperationalError:
-        return pd.DataFrame() # Zwraca pustą tabelę jeśli baza jeszcze nie istnieje
+        return pd.DataFrame() # Zwraca pustą tabelę jeśli baza nie istnieje
 
 df = load_data()
 

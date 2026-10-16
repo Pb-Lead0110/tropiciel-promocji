@@ -1,3 +1,5 @@
+# requirements 
+
 playwright
 beautifulsoup4
 streamlit

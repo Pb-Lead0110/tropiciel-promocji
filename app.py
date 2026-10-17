@@ -74,13 +74,13 @@ if not df.empty:
             # Dynamiczne dobieranie koloru i tekstu
             if roznica < 0:
                 kolor = "inverse"  # Spadek ceny: Streamlit pokaże na zielono (ze strzałką w dół)
-                tekst = f"{roznica:.2f} zł"
+                tekst = f"-{roznica:.2f} zł"
             elif roznica > 0:
                 kolor = "inverse"  # Wzrost ceny: Streamlit pokaże na czerwono (ze strzałką w górę)
                 tekst = f"+{roznica:.2f} zł" # Dodajemy plus dla czytelności
             else:
                 kolor = "off"      # Brak zmian: Szary kolor
-                tekst = "➔ Bez zmian"
+                tekst = "Bez zmian"
                 
             with cols[idx]:
                 st.metric(

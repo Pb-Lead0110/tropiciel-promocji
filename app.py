@@ -80,7 +80,7 @@ if not df.empty:
                 tekst = f"+{roznica:.2f} zł" # Dodajemy plus dla czytelności
             else:
                 kolor = "off"      # Brak zmian: Szary kolor
-                tekst = "Bez zmian"
+                tekst = "-"
                 
             with cols[idx]:
                 st.metric(

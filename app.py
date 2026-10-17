@@ -65,20 +65,29 @@ if not df.empty:
         if not dane_produktu.empty:
             ostatnia_cena = dane_produktu.iloc[-1]['Current_Price']
             
-            # Jeśli mamy więcej niż jeden wpis, sprawdzamy różnicę z poprzednim dniem
             if len(dane_produktu) > 1:
                 poprzednia_cena = dane_produktu.iloc[-2]['Current_Price']
                 roznica = ostatnia_cena - poprzednia_cena
             else:
                 roznica = 0
                 
-            # Wyświetlanie sformatowanej karty (KPI)
+            # Dynamiczne dobieranie koloru i tekstu
+            if roznica < 0:
+                kolor = "inverse"  # Spadek ceny: Streamlit pokaże na zielono (ze strzałką w dół)
+                tekst = f"{roznica:.2f} zł"
+            elif roznica > 0:
+                kolor = "inverse"  # Wzrost ceny: Streamlit pokaże na czerwono (ze strzałką w górę)
+                tekst = f"+{roznica:.2f} zł" # Dodajemy plus dla czytelności
+            else:
+                kolor = "off"      # Brak zmian: Szary kolor
+                tekst = "➔ Bez zmian"
+                
             with cols[idx]:
                 st.metric(
                     label=produkt, 
                     value=f"{ostatnia_cena:.2f} zł", 
-                    delta=f"{roznica:.2f} zł" if roznica != 0 else "Bez zmian",
-                    delta_color="inverse" # Kolor: spadek na zielono, wzrost na czerwono!
+                    delta=tekst,
+                    delta_color=kolor
                 )
                 
     st.divider()

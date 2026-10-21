@@ -153,7 +153,7 @@ if not df.empty:
             margin=dict(l=10, r=10, t=80, b=10),
             hoverlabel=dict(
                 bgcolor="rgba(20, 20, 20, 0.95)",
-                font_size=12,
+                font_size=18,
                 namelength=-1
             )
         )

@@ -140,11 +140,12 @@ if not df.empty:
         )
         
         fig.update_layout(
+            height=550,
             yaxis_title="Cena (PLN)",
             xaxis_title="",
             legend_title="Monitorowane pozycje:",
             hovermode="x unified",
-            margin=dict(l=0, r=0, t=80, b=0)
+            margin=dict(l=10, r=10, t=80, b=10)
         )
         fig.update_xaxes(tickformat="%d.%m.%Y")
         fig.update_yaxes(rangemode="normal", ticksuffix=" zł") 

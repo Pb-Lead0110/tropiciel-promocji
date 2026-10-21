@@ -32,6 +32,15 @@ def load_data():
         
         df['Check_Date'] = pd.to_datetime(df['Check_Date'])
         df = df.sort_values(by='Check_Date')
+        
+        # --- ZMIANA: Grupowanie po dniu (zachowanie 1 ostatniego pomiaru z danego dnia) ---
+        df['Date_Only'] = df['Check_Date'].dt.date
+        df = df.drop_duplicates(subset=['Name', 'Date_Only'], keep='last')
+        
+        # Ustawienie Check_Date na pełną datę bez czasu
+        df['Check_Date'] = pd.to_datetime(df['Date_Only'])
+        df = df.drop(columns=['Date_Only'])
+        
         return df
     except Exception:
         return pd.DataFrame()
@@ -63,7 +72,6 @@ if not df.empty:
     if not wybrane_produkty:
         st.info("Zaznacz co najmniej jeden produkt w panelu bocznym, aby zobaczyć metryki.")
     else:
-        # Tworzenie osobnej karty dla każdego produktu
         for produkt in wybrane_produkty:
             dane_produktu = filtered_df[filtered_df['Name'] == produkt]
             
@@ -72,29 +80,27 @@ if not df.empty:
                 min_cena = dane_produktu['Current_Price'].min()
                 max_cena = dane_produktu['Current_Price'].max()
                 
-                # Znalezienie daty wystąpienia najniższej ceny
+                # Znalezienie daty wystąpienia najniższej ceny (tylko data)
                 row_min = dane_produktu[dane_produktu['Current_Price'] == min_cena].iloc[-1]
                 data_min = row_min['Check_Date'].strftime('%d.%m.%Y')
                 
-                # Obliczenie różnicy względem poprzedniego pomiaru
+                # Obliczenie różnicy względem poprzedniego dnia
                 if len(dane_produktu) > 1:
                     poprzednia_cena = dane_produktu.iloc[-2]['Current_Price']
                     roznica = ostatnia_cena - poprzednia_cena
                 else:
                     roznica = 0
                 
-                # Formatowanie tekstu i koloru delty
                 if roznica < 0:
                     delta_text = format_pln(roznica)
-                    delta_color = "inverse"  # Spadek ceny = zielony w Streamlit
+                    delta_color = "inverse"
                 elif roznica > 0:
                     delta_text = f"+{format_pln(roznica)}"
-                    delta_color = "inverse"  # Wzrost ceny = czerwony w Streamlit
+                    delta_color = "inverse"
                 else:
                     delta_text = None
                     delta_color = "off"
                 
-                # Karta dedykowana dla pojedynczego produktu
                 with st.container(border=True):
                     st.markdown(f"### 🏷️ {produkt}")
                     c1, c2, c3 = st.columns(3)
@@ -140,6 +146,7 @@ if not df.empty:
             hovermode="x unified",
             margin=dict(l=0, r=0, t=30, b=0)
         )
+        fig.update_xaxes(tickformat="%d.%m.%Y")
         fig.update_yaxes(rangemode="normal", ticksuffix=" zł") 
         
         st.plotly_chart(fig, use_container_width=True)
@@ -152,7 +159,8 @@ if not df.empty:
     st.subheader("📋 Ostatnio zapisane logi")
     
     display_df = filtered_df.copy()
-    display_df['Check_Date'] = display_df['Check_Date'].dt.strftime('%Y-%m-%d %H:%M')
+    # Formatowanie daty na sama datę (bez godziny)
+    display_df['Check_Date'] = display_df['Check_Date'].dt.strftime('%d.%m.%Y')
     display_df['Current_Price'] = display_df['Current_Price'].apply(format_pln)
     
     display_df = display_df.rename(columns={

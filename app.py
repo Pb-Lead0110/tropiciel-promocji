@@ -144,7 +144,7 @@ if not df.empty:
             xaxis_title="",
             legend_title="Monitorowane pozycje:",
             hovermode="x unified",
-            margin=dict(l=0, r=0, t=30, b=0)
+            margin=dict(l=0, r=0, t=80, b=0)
         )
         fig.update_xaxes(tickformat="%d.%m.%Y")
         fig.update_yaxes(rangemode="normal", ticksuffix=" zł") 

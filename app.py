@@ -33,7 +33,7 @@ def load_data():
         df['Check_Date'] = pd.to_datetime(df['Check_Date'])
         df = df.sort_values(by='Check_Date')
         
-        # --- ZMIANA: Grupowanie po dniu (zachowanie 1 ostatniego pomiaru z danego dnia) ---
+        # Grupowanie po dniu (zachowanie 1 ostatniego pomiaru z danego dnia)
         df['Date_Only'] = df['Check_Date'].dt.date
         df = df.drop_duplicates(subset=['Name', 'Date_Only'], keep='last')
         
@@ -139,13 +139,23 @@ if not df.empty:
             labels={'Check_Date': 'Data pomiaru', 'Current_Price': 'Cena (zł)', 'Name': 'Produkt'}
         )
         
+        # Oczyszczenie dymki hover: 1 krótka linia per produkt (Nazwa: Cena)
+        fig.update_traces(
+            hovertemplate="<b>%{fullData.name}</b>: %{y:,.2f} zł<extra></extra>"
+        )
+
         fig.update_layout(
             height=550,
             yaxis_title="Cena (PLN)",
             xaxis_title="",
             legend_title="Monitorowane pozycje:",
             hovermode="x unified",
-            margin=dict(l=10, r=10, t=80, b=10)
+            margin=dict(l=10, r=10, t=80, b=10),
+            hoverlabel=dict(
+                bgcolor="rgba(20, 20, 20, 0.95)",
+                font_size=12,
+                namelength=-1
+            )
         )
         fig.update_xaxes(tickformat="%d.%m.%Y")
         fig.update_yaxes(rangemode="normal", ticksuffix=" zł") 
@@ -160,7 +170,6 @@ if not df.empty:
     st.subheader("📋 Ostatnio zapisane logi")
     
     display_df = filtered_df.copy()
-    # Formatowanie daty na sama datę (bez godziny)
     display_df['Check_Date'] = display_df['Check_Date'].dt.strftime('%d.%m.%Y')
     display_df['Current_Price'] = display_df['Current_Price'].apply(format_pln)
     

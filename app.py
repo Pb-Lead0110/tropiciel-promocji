@@ -108,13 +108,13 @@ if not df.empty:
                         )
                     with c2:
                         st.metric(
-                            label="📉 Najniższa cena (MIN)", 
+                            label="📉 Najniższa cena", 
                             value=format_pln(min_cena),
                             help=f"Data najniższej ceny: {data_min}"
                         )
                     with c3:
                         st.metric(
-                            label="📈 Najwyższa cena (MAX)", 
+                            label="📈 Najwyższa cena", 
                             value=format_pln(max_cena)
                         )
                 
